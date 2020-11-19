@@ -23,7 +23,9 @@ app.use(express.static(`${__dirname}/public`));
 
 //index route
 app.get("/", (req, res) => {
-    res.render("index");
+    res.render("index", {
+        stripePublishabaleKey: keys.stripePublishabaleKey
+    });
 });
 app.get("/success", (req, res) => {
     res.render("success");
