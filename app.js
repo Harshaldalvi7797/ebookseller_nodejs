@@ -1,18 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
-// const stripe = require("stripe")(
-//   "sk_test_51Hp8swCIaZnxCRUH7xN5nB5b1yCR4epngHj2BZHqQrH7b1EDWdNxiAL25QbDXKOpmpI2aL4r4WvG4XFARPauwSJU00EYtgNhip"
-// );
+const keys = require("./config/keys")
+const stripe = require("stripe")(keys.stripeSecretKey)
 
 const app = express();
 // Handlebars Middleware
-app.engine('handlebars',exphbs({defaultLayout:'main'}));
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main'
+}));
 app.set('view engine', 'handlebars');
 
 // Body Parser Middleware
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 
 // Set Static Folder
 app.use(express.static(`${__dirname}/public`));
@@ -22,6 +25,32 @@ app.use(express.static(`${__dirname}/public`));
 app.get("/", (req, res) => {
     res.render("index");
 });
+app.get("/success", (req, res) => {
+    res.render("success");
+});
+
+//change route
+app.post("/charge", (req, res) => {
+    const amount = 2500
+    // console.log(req.body)
+    // res.send("test")
+    // Create a new customer and then create an invoice item then invoice it:
+    stripe.customers
+        .create({
+            email: req.body.stripeEmail,
+            source: req.body.stripeToken
+        })
+        .then((customer) => {
+            stripe.charges.create({
+                amount,
+                description: "Web developmen EBook",
+                currency: 'usd',
+                customer: customer.id
+
+            })
+        }).then(charge => res.render('success'));
+
+})
 
 
 
